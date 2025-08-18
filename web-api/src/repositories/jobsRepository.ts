@@ -1,6 +1,6 @@
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
-import { Job } from "../types/domain";
-import { getDocClient, getTableName } from "./dynamo";
+import { Job } from "@/types/domain";
+import { getDocClient, getTableName } from "@/clients/dynamo";
 
 export class JobsRepository {
   private tableName = getTableName();

@@ -1,6 +1,6 @@
 import { GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { Brand, BrandSummary } from "../types/domain";
-import { getDocClient, getTableName } from "./dynamo";
+import { getDocClient, getTableName } from "../clients/dynamo";
 
 export class BrandsRepository {
   private tableName = getTableName();

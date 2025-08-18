@@ -8,32 +8,26 @@ import {
   staggerItemVariants,
 } from "@/lib/animations";
 import { useScrollAnimation } from "@/hooks/use-animation";
-import { headerImageUrl } from "@/data/images";
+// import { headerImageUrl } from "@/data/images";
 
 const steps = [
   {
     number: 1,
-    title: "Share your URL",
+    title: "Enter your website",
     description:
-      "Simply paste your website URL. Our system analyzes your content, brand, and messaging automatically.",
+      "Scan your site and analyze how you write—tone, style, and messaging.",
   },
   {
     number: 2,
-    title: "We create clips",
+    title: "Fine Tune Your Voice",
     description:
-      "Our system generates multiple social media clips optimized for different platforms and audiences.",
+      "Edit tone, style, audience, and more until it sounds just right.",
   },
   {
     number: 3,
-    title: "Review and refine",
+    title: "Save & Create Content",
     description:
-      "Preview your clips before publishing. Make adjustments, swap content, or regenerate with simple prompts.",
-  },
-  {
-    number: 4,
-    title: "Publish and grow",
-    description:
-      "Export in any format. Your clips are ready to boost engagement across all social platforms.",
+      "Sign up for a free trial and let AI create social posts, emails, blogs, and more.",
   },
 ];
 
@@ -57,12 +51,12 @@ export default function StepsSection() {
             Cosmos
           </div>
           <h2 className="text-4xl sm:text-5xl font-light text-primary mb-4">
-            4 steps to launch
+            How it works
           </h2>
         </motion.div>
 
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           ref={gridAnimation.ref}
           initial="hidden"
           animate={gridAnimation.animate}

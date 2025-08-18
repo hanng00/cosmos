@@ -12,8 +12,7 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@workspace/schema": ["./vendor/schema/index.js"]
+      "@/*": ["./src/*"]
     }
   },
   "exclude": ["node_modules", "**/*.test.ts"]

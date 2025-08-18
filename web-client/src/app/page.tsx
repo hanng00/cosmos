@@ -9,6 +9,7 @@ import { cosmosVideos } from "@/data/cosmos-videos";
 import { fadeInUpVariants } from "@/lib/animations";
 import { useScrollAnimation } from "@/hooks/use-animation";
 import { MeStatus } from "@/components/MeStatus";
+import { NavBar } from "@/components/NavBar";
 
 export default function Home() {
   const cosmosAnimation = useScrollAnimation(fadeInUpVariants);
@@ -20,6 +21,7 @@ export default function Home() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
     >
+      <NavBar />
       <div className="p-4 sm:p-8 md:p-12 lg:p-16 w-full">
         <HeroSection />
 

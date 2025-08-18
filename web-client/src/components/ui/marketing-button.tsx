@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Button, buttonVariants } from "./button";
+import { Button } from "./button";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";

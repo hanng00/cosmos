@@ -1,17 +1,14 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { withCors } from "../utils/cors";
+import { withCors } from "@/utils/cors";
 import { z } from "zod";
-import { BrandsRepository } from "../repositories/brandsRepository";
-import { JobsRepository } from "../repositories/jobsRepository";
+import { BrandsRepository } from "@/repositories/brandsRepository";
+import { JobsRepository } from "@/repositories/jobsRepository";
+import { getUserFromEvent } from "@/features/auth";
 
 const requestSchema = z.object({ sourceUrl: z.string().url() });
 
 const brandsRepo = new BrandsRepository();
 const jobsRepo = new JobsRepository();
-
-function generateId(): string {
-  return Math.random().toString(36).slice(2, 10);
-}
 
 export const lambdaHandler = async (
   event: APIGatewayProxyEvent
@@ -42,18 +39,26 @@ export const lambdaHandler = async (
       return {
         statusCode: 400,
         headers: withCors({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ message: "Invalid body", issues: parse.error.flatten() }),
+        body: JSON.stringify({
+          message: "Invalid body",
+          issues: parse.error.flatten(),
+        }),
       };
     }
 
     const { sourceUrl } = parse.data;
-    const authorizer = (event.requestContext as any)?.authorizer ?? null;
-    const claims = (authorizer && (authorizer as any).claims) || null;
-    const userId: string | null = (claims && claims.sub) || (authorizer && (authorizer as any).principalId) || null;
+    const user = getUserFromEvent(event);
+    if (!user) {
+      return {
+        statusCode: 401,
+        headers: withCors({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ message: "Unauthorized" }),
+      };
+    }
 
     // AuthZ: check brand ownership (PK=BRAND#brandId, SK=BRAND) with userId
     const brandItem = await brandsRepo.getById(brandId);
-    if (!brandItem || (userId && brandItem.userId !== userId)) {
+    if (!brandItem || (user.userId && brandItem.userId !== user.userId)) {
       return {
         statusCode: 403,
         headers: withCors({ "Content-Type": "application/json" }),
@@ -63,7 +68,7 @@ export const lambdaHandler = async (
 
     const job = await jobsRepo.createQueuedJob({
       brandId,
-      userId: brandItem.userId,
+      userId: user.userId,
       sourceUrl,
     });
 
@@ -76,9 +81,9 @@ export const lambdaHandler = async (
     return {
       statusCode: 500,
       headers: withCors({ "Content-Type": "application/json" }),
-      body: JSON.stringify({ message: (err as Error).message || "Internal Server Error" }),
+      body: JSON.stringify({
+        message: (err as Error).message || "Internal Server Error",
+      }),
     };
   }
 };
-
-

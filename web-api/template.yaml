@@ -6,7 +6,10 @@ Description: >
 Globals:
   Function:
     Timeout: 3
-
+    Runtime: nodejs22.x
+    Architectures:
+      - x86_64
+    
 Resources:
   ApiGatewayApi:
     Type: AWS::Serverless::Api
@@ -22,9 +25,25 @@ Resources:
         AddDefaultAuthorizerToCorsPreflight: false
 
       Cors:
-        AllowMethods: "'GET,POST,PATCH,OPTIONS'"
+        AllowMethods: "'GET,POST,PUT,PATCH,OPTIONS'"
         AllowOrigin: "'*'"
         AllowHeaders: "'*'"
+
+      GatewayResponses:
+        UNAUTHORIZED:
+          StatusCode: 401
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: "'*'"
+              Access-Control-Allow-Headers: "'*'"
+              Access-Control-Allow-Methods: "'GET,POST,PUT,PATCH,OPTIONS'"
+        DEFAULT_4XX:
+          StatusCode: 400
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: "'*'"
+              Access-Control-Allow-Headers: "'*'"
+              Access-Control-Allow-Methods: "'GET,POST,PUT,PATCH,OPTIONS'"
 
   CosmosBackendTable:
     Type: AWS::DynamoDB::Table
@@ -41,6 +60,8 @@ Resources:
         - AttributeName: SK
           KeyType: RANGE
       TableName: !Sub "${AWS::StackName}-backend-table"
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
 
   # <--- Cognito ---
   CognitoUserPool:
@@ -72,9 +93,6 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/getHealth.lambdaHandler
-      Runtime: nodejs22.x
-      Architectures:
-        - x86_64
       Events:
         GetHealth:
           Type: Api
@@ -95,10 +113,7 @@ Resources:
   GetMeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src/auth/getMe.lambdaHandler
-      Runtime: nodejs22.x
-      Architectures:
-        - x86_64
+      Handler: src/features/auth/getMe.lambdaHandler
       Events:
         GetMe:
           Type: Api
@@ -117,10 +132,7 @@ Resources:
   PostBrandFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src/brands/postBrand.lambdaHandler
-      Runtime: nodejs22.x
-      Architectures:
-        - x86_64
+      Handler: src/features/brands/postBrand.lambdaHandler
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CosmosBackendTable
@@ -142,10 +154,7 @@ Resources:
   GetBrandsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src/brands/getBrands.lambdaHandler
-      Runtime: nodejs22.x
-      Architectures:
-        - x86_64
+      Handler: src/features/brands/getBrands.lambdaHandler
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref CosmosBackendTable
@@ -166,10 +175,7 @@ Resources:
   PostGenerateFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src/brands/postGenerate.lambdaHandler
-      Runtime: nodejs22.x
-      Architectures:
-        - x86_64
+      Handler: src/features/brands/postGenerate.lambdaHandler
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CosmosBackendTable
@@ -179,6 +185,144 @@ Resources:
           Properties:
             RestApiId: !Ref ApiGatewayApi
             Path: /brands/{brandId}/generate
+            Method: post
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CosmosBackendTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Sourcemap: true
+
+  CreateBrandVoiceAnalysisFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/features/brandVoices/createAnalysis.lambdaHandler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CosmosBackendTable
+      Events:
+        CreateBrandVoiceAnalysis:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /brand-voices/analyses
+            Method: post
+            Auth:
+              Authorizer: NONE
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CosmosBackendTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Sourcemap: true
+
+  PutBrandVoiceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/features/brands/putBrandVoice.lambdaHandler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CosmosBackendTable
+      Events:
+        PutBrandVoice:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /brands/{brandId}/voice
+            Method: put
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CosmosBackendTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Sourcemap: true
+
+  GetBrandVoiceAnalysisFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/features/brandVoices/getAnalysis.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref CosmosBackendTable
+      Events:
+        GetBrandVoiceAnalysis:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /brand-voices/analyses/{analysisId}
+            Method: get
+            Auth:
+              Authorizer: NONE
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CosmosBackendTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Sourcemap: true
+
+  BrandVoiceAnalysisWorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/features/brandVoices/analysisWorker.lambdaHandler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CosmosBackendTable
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CosmosBackendTable
+      Events:
+        OnBrandVoiceInsert:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt CosmosBackendTable.StreamArn
+            StartingPosition: LATEST
+            BatchSize: 10
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Sourcemap: true
+
+  CreateFreeBrandVoiceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/features/brandVoices/createFreeBrandVoice.lambdaHandler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CosmosBackendTable
+      Events:
+        CreateFreeBrandVoice:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /brand-voices/free
+            Method: post
+            Auth:
+              Authorizer: NONE
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CosmosBackendTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Sourcemap: true
+
+  ClaimFreeBrandVoiceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/features/brandVoices/claimFreeBrandVoice.lambdaHandler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CosmosBackendTable
+      Events:
+        ClaimFreeBrandVoice:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /brand-voices/free/{freeVoiceId}/claim
             Method: post
       Environment:
         Variables:

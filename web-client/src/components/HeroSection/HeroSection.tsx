@@ -5,24 +5,19 @@ import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import CosmosLogo from "@/components/Logo";
-import {
-  fadeInUpVariants,
-  createFadeInUpVariants,
-  createStaggerContainerVariants,
-} from "@/lib/animations";
+import { fadeInUpVariants, createFadeInUpVariants } from "@/lib/animations";
 import { useScrollAnimation } from "@/hooks/use-animation";
 import { headerImageUrl } from "@/data/images";
 import styles from "./HeroSection.module.css";
-import { useRouter } from "next/navigation";
 import { getUrlIfValid } from "@/lib/url";
-import { useStartGeneration } from "@/features/generate/hooks";
+import { useBrandVoiceModal } from "@/features/brand-voices/BrandVoiceProvider";
 
 export default function HeroSection() {
   const [url, setUrl] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const router = useRouter();
+  const [submitted] = useState(false);
+  // const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const startGeneration = useStartGeneration();
+  const brandVoiceModal = useBrandVoiceModal();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,21 +27,7 @@ export default function HeroSection() {
       setError("Please enter a valid URL.");
       return;
     }
-    startGeneration.mutate(
-      { sourceUrl: urlIfValid.toString() },
-      {
-        onSuccess: ({ jobId, brandId }) => {
-          router.push(
-            `/brands/${brandId}/generate/${jobId}?sourceUrl=${encodeURIComponent(
-              urlIfValid.toString()
-            )}`
-          );
-        },
-        onError: (err) => {
-          setError(err instanceof Error ? err.message : "Failed to start job");
-        },
-      }
-    );
+    brandVoiceModal.open(urlIfValid.toString());
   };
 
   // Animation hooks for different elements
@@ -122,17 +103,18 @@ export default function HeroSection() {
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             required
-            className="h-10 flex-1 text-lg px-4 py-4 border-0 bg-white/20 text-white placeholder:text-white/60 rounded-2xl focus:ring-2 focus:ring-white/30 transition-all backdrop-blur-sm min-w-0"
+            className="h-10 flex-1 text-lg px-4 py-4 border-0 bg-white/20 text-white placeholder:text-white/60 rounded-lg focus:ring-2 focus:ring-white/30 transition-all backdrop-blur-sm min-w-0"
           />
           <Button
             type="submit"
-            className="h-10 bg-white/20 text-white font-medium text-sm px-6 py-4 rounded-2xl backdrop-blur-md hover:bg-white/30 transition-all shadow-none border-0"
-            style={{ minWidth: 170 }}
-            disabled={startGeneration.isPending}
+            className="h-10 bg-white/20 text-white font-medium text-sm px-6 py-4 rounded-lg backdrop-blur-md hover:bg-white/30 transition-all shadow-none border-0"
+            size="lg"
+            disabled={false}
           >
-            {startGeneration.isPending ? "Starting…" : "Generate Clips"}
+            Generate Your Voice
           </Button>
         </motion.form>
+
 
         {submitted && (
           <motion.div

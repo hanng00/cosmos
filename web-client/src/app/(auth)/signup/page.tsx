@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import {
   signIn,
@@ -11,6 +11,7 @@ import {
   confirmResetPassword,
 } from "aws-amplify/auth";
 import "@/lib/amplify";
+import { claimFreeBrandVoice } from "@/features/brand-voices/api";
 import {
   Card,
   CardContent,
@@ -28,6 +29,7 @@ const passwordSchema = z.string().min(8);
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"signIn" | "signUp">("signIn");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +68,18 @@ export default function LoginPage() {
     setError(null);
     try {
       await signIn({ username: email, password });
-      router.replace("/brands");
+      const freeVoiceId = searchParams.get("free_brand_voice_id");
+      if (freeVoiceId) {
+        try {
+          const { brandId } = await claimFreeBrandVoice({ freeVoiceId });
+          router.replace(`/brands/${brandId}`);
+          return;
+        } catch {
+          // fall through to normal navigation
+        }
+      }
+      const next = searchParams.get("next") || "/brands";
+      router.replace(next);
     } catch (err: unknown) {
       setError(getErrorMessage(err));
     } finally {
@@ -341,6 +354,6 @@ export default function LoginPage() {
 function getErrorMessage(err: unknown): string {
   if (typeof err === "string") return err;
   if (err && typeof err === "object" && "message" in err)
-    return String((err as any).message);
+    return String((err as { message?: unknown }).message);
   return "Something went wrong. Please try again.";
 }

@@ -15,4 +15,9 @@ export async function authenticatedFetch(input: string, init?: RequestInit) {
   return fetch(url, { ...init, headers });
 }
 
+export async function publicFetch(input: string, init?: RequestInit) {
+  const url = input.startsWith("http") ? input : `${API_BASE_URL}${input}`;
+  return fetch(url, init);
+}
+
 

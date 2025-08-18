@@ -6,8 +6,7 @@ import { CosmosCarouselProps } from '@/types/cosmos';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { 
-  fadeInUpVariants, 
-  createFadeInUpVariants,
+  fadeInUpVariants,
   createStaggerContainerVariants,
   staggerItemVariants 
 } from '@/lib/animations';

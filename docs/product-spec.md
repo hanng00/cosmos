@@ -6,15 +6,15 @@
 
 # Why
 
-Brands and creators live or die by their ability to stay visible and relevant, but creating short, polished social content is expensive and slow. The routine of turning an article, blog post or page into shareable social creative requires people who know storytelling, design and motion — a luxury most small teams don’t have. Cosmos exists to change that by converting a single website URL into an immediate, on-brand content output: a compact sequence of high-quality images and captions that are ready to publish or stitch into a short video. The goal is to give users a clear, credible win in minutes so they feel the product’s value instantly and come back because it continually helps them publish better, faster.
+Brands and creators live or die by their ability to stay visible and relevant, but creating short, polished social content is expensive and slow. Most teams lack the time and motion/design skills to repeatedly turn articles and pages into on-brand visuals. Cosmos solves this by centering the workflow on the Brand: users create a Brand (voice, style, presets) once, then generate consistently on-brand visuals from any source URL in minutes. We optimize for quick, credible wins and a reusable brand library so creators publish better, faster, and stay consistent across posts and campaigns.
 
 # How
 
-Cosmos uses LLM-driven agents as the creative engine. When a user pastes a URL, a chain of steps runs automatically: the page is scraped and summarized, the LLM writes short narration and caption candidates that match the brand voice, and image models generate a handful of visual panels (hero images, illustrative frames, excerpt callouts) that pair with those captions. The platform stitches metadata and assets into a coherent sequence of images + caption tracks stored in S3 and surfaced in the browser. The UI focuses on a single, fast path: minimal brand setup, paste a URL, tap **Generate**, and watch the system produce a high-quality image set. Crucially, we optimize perceived speed by streaming intermediate results (first images, key captions) as they become available so the user sees progress and gets an early preview before the whole job completes.
+Cosmos uses LLM-driven agents with a brand-first flow. The user selects or creates a Brand, pastes a URL, and a brand-scoped Job is created. The pipeline scrapes the page, summarizes it, generates brand-aligned captions, and produces images that match the Brand’s style. Assets and metadata are stitched into a coherent sequence stored in S3 under the Brand. The UI follows a single fast path: minimal brand setup, paste a URL, tap **Generate**. We optimize perceived speed with streaming: partial results (first captions/thumbnails) arrive via events so users see progress and an early preview before the full set completes.
 
 # What
 
-Cosmos is a web app that converts a website URL into a branded content package composed of a small set of images and matching captions, with tools to preview, tweak, save and download. The MVP delivers: auth and lightweight brand setup; a one-click URL → generate experience; LLM-produced narration/caption suggestions; model-generated images (text→image / img→img variants); a preview and inline caption editor; and exportable image assets. The product deliberately excludes — for MVP — direct posting automation, multi-source connectors, and long-form video rendering. Our immediate product promise: paste one URL and get an on-brand visual story in minutes.
+Cosmos is a web app that turns a URL into a Brand-scoped content package: a small set of images and matching captions with tools to preview, tweak, save, and download. The MVP delivers: auth and lightweight Brand setup; a one-click Brand → URL → generate flow; LLM-produced captions; model-generated images; a preview and inline caption editor; a Brand library of generated Reels; and exportable image assets. We deliberately exclude — for MVP — direct posting automation, multi-source connectors, and long-form video. The immediate promise: create a Brand once, paste a URL, and get an on-brand visual story in minutes.
 
 ---
 
@@ -62,6 +62,42 @@ Cosmos is a web app that converts a website URL into a branded content package c
 ---
 
 # Technical architecture (MVP)
+
+## Domain model (Brand hierarchy)
+
+- Brand: owned by a user; holds style presets and settings; root entity for generation and library.
+- Source (optional for later): URL or feed connected to a Brand for quick generate.
+- Job: brand-scoped generation request created from a `sourceUrl`; streams status events until completion.
+- Reel: the saved, consumable output of a completed Job (frames + manifest) under a Brand; appears in the Library.
+- Frame: image + caption within a Reel.
+
+## API surface (MVP)
+
+- POST `/brands` → create a Brand for the authenticated user
+- GET `/brands` → list Brands for the authenticated user
+- POST `/brands/{brandId}/generate` → submit `{ sourceUrl }` to create a brand-scoped Job; returns `{ jobId, brandId }`
+- GET `/me` → current authenticated user info
+
+Planned as the pipeline matures:
+- GET `/jobs/{jobId}/events` (SSE) → stream status updates and partial results
+- GET `/brands/{brandId}/reels` → list Reels for a Brand
+- GET `/reels/{reelId}/download` → ZIP with images + manifest
+
+## Data model (DynamoDB, single-table)
+
+- PK `BRAND#<brandId>`, SK `BRAND` → brand metadata
+- PK `USER#<userId>`, SK `BRAND#<createdAt>#<brandId>` → pointer items to list brands by user (Query by PK)
+- PK `BRAND#<brandId>`, SK `JOB#<createdAt>#<jobId>` → jobs
+- PK `BRAND#<brandId>`, SK `REEL#<createdAt>#<reelId>` → reels
+- PK `BRAND#<brandId>`, SK `FRAME#<reelId>#<index>` → frames
+- (Optional) PK `JOB#<jobId>`, SK `EVENT#<timestamp>` or nested under Brand PK for SSE events
+
+## Assets layout (S3)
+
+- `brands/<brandId>/jobs/<jobId>/images/frame-<n>.png`
+- `brands/<brandId>/jobs/<jobId>/thumbs/frame-<n>.jpg`
+- `brands/<brandId>/jobs/<jobId>/manifest.json`
+- `brands/<brandId>/reels/<reelId>/...` (final assets)
 
 ## Frontend
 

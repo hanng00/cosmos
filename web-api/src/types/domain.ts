@@ -30,4 +30,23 @@ export interface Job {
   updatedAt: string;
 }
 
+export interface BrandVoice {
+  name: string;
+  purpose: string;
+  audience: string;
+  tone: string[];
+  emotion: string[];
+  character: string[];
+  syntax: string[];
+  language: string[];
+}
+
+export interface FreeBrandVoice {
+  freeVoiceId: string;
+  email: string | null;
+  voice: BrandVoice;
+  createdAt: string;
+  updatedAt: string;
+}
+
 

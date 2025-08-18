@@ -1,5 +1,4 @@
 import { headerImageUrl } from "@/data/images";
-import { Button } from "../ui/button";
 import { MarketingButton } from "../ui/marketing-button";
 import styles from "./PricingSection.module.css";
 
@@ -53,7 +52,7 @@ export default function PricingSection() {
 
       <div className="relative z-10 max-w-6xl mx-auto w-full">
         <h2 className="text-4xl sm:text-5xl font-light text-white text-center mb-12">
-          Pricing that doesn't empty your wallet
+          Pricing that doesn&apos;t empty your wallet
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 justify-center items-stretch">
           {tiers.map((tier) => (
