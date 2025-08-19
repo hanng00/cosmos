@@ -115,7 +115,6 @@ export default function HeroSection() {
           </Button>
         </motion.form>
 
-
         {submitted && (
           <motion.div
             className="mt-6 text-center text-white text-sm font-medium"

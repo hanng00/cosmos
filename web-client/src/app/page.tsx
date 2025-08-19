@@ -41,12 +41,6 @@ export default function Home() {
 
       <StepsSection />
 
-      <div className="px-4 sm:px-8 md:px-12 lg:px-16 w-full">
-        <div className="max-w-6xl mx-auto mt-4 text-right">
-          <MeStatus className="text-xs text-muted-foreground" />
-        </div>
-      </div>
-
       <PricingSection />
 
       {/* Footer */}
