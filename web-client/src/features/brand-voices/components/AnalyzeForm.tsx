@@ -9,12 +9,12 @@ interface AnalyzeFormProps {
   onWebsiteUrlChange: (v: string) => void;
   writingSample: string;
   onWritingSampleChange: (v: string) => void;
-  onAnalyze: (args: { sourceUrl: string; writingSample?: string }) => void;
-  isAnalyzing: boolean;
-  isPolling: boolean;
+  onAnalyze?: (args: { sourceUrl: string; writingSample?: string }) => void;
+  isAnalyzing?: boolean;
+  isPolling?: boolean;
 }
 
-export function AnalyzeForm({ websiteUrl, onWebsiteUrlChange, writingSample, onWritingSampleChange, onAnalyze, isAnalyzing, isPolling }: AnalyzeFormProps) {
+export function AnalyzeForm({ websiteUrl, onWebsiteUrlChange, writingSample, onWritingSampleChange, isPolling }: AnalyzeFormProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid gap-2">

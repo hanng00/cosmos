@@ -1,6 +1,6 @@
 "use client";
 
-import { useMe } from "@/features/account/hooks";
+import { useMe } from "@/features/auth/useMe";
 
 type Props = {
   className?: string;

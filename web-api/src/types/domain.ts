@@ -4,6 +4,8 @@ export interface Brand {
   name: string;
   createdAt: string;
   updatedAt: string;
+  // Optional snapshot of the saved Brand Voice for quick reads
+  voiceSnapshot?: BrandVoice;
 }
 
 export interface BrandSummary {
@@ -45,6 +47,19 @@ export interface FreeBrandVoice {
   freeVoiceId: string;
   email: string | null;
   voice: BrandVoice;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PostStatus = "draft" | "generated" | "published";
+
+export interface Post {
+  postId: string;
+  brandId: string;
+  title: string;
+  excerpt?: string;
+  thumbnailUrl?: string;
+  status: PostStatus;
   createdAt: string;
   updatedAt: string;
 }

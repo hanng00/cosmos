@@ -1,0 +1,48 @@
+.logo {}
+
+.svg {
+  overflow: visible;
+}
+
+.orbitLeft,
+.orbitRight,
+.capsule,
+.core {
+  transition: transform 900ms ease-in-out,
+              opacity 700ms ease-in-out,
+              filter 700ms ease-in-out;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Preserve default appearance: capsule is initially rotated 20deg around center (24,24) */
+.capsule {
+  transform: rotate(20deg);
+}
+
+/* On hover: swap the orbits horizontally.
+   Each circle has diameter 20, so 60% translate equals 12 units (from 18 -> 30 and vice versa) */
+.logo:hover .orbitLeft {
+  transform: translateX(60%);
+}
+
+.logo:hover .orbitRight {
+  transform: translateX(-60%);
+}
+
+/* Mirror the capsule across the vertical axis by flipping the tilt */
+.logo:hover .capsule {
+  transform: rotate(-20deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbitLeft,
+  .orbitRight,
+  .capsule,
+  .core {
+    transition: none;
+    animation: none !important;
+  }
+}
+
+

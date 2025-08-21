@@ -8,7 +8,6 @@ import PricingSection from "@/components/PricingSection";
 import { cosmosVideos } from "@/data/cosmos-videos";
 import { fadeInUpVariants } from "@/lib/animations";
 import { useScrollAnimation } from "@/hooks/use-animation";
-import { MeStatus } from "@/components/MeStatus";
 import { NavBar } from "@/components/NavBar";
 
 export default function Home() {

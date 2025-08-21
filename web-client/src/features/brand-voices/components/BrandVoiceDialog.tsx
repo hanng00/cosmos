@@ -11,8 +11,11 @@ import {
 import { AnalyzeForm } from "./AnalyzeForm";
 import { VoiceEditor } from "./VoiceEditor";
 import { DialogFooterActions } from "./DialogFooterActions";
-import { useAnalyzeVoice, useVoiceDraft, useSaveOrUseVoice } from "../hooks";
-import { useVoiceStore } from "../store";
+import {
+  useAnalyzeVoice,
+  useVoiceDraft,
+  useFreeBrandVoiceUserFlow,
+} from "../hooks/useFreeBrandVoiceUserFlow";
 
 export function BrandVoiceDialog({
   onClose,
@@ -24,9 +27,9 @@ export function BrandVoiceDialog({
   const { websiteUrl, setWebsiteUrl, brandVoice, setBrandVoice, clearAll } =
     useVoiceDraft(initialUrl);
   const { state, start, reset } = useAnalyzeVoice();
-  const actions = useSaveOrUseVoice();
+  const flow = useFreeBrandVoiceUserFlow();
   const [writingSample, setWritingSample] = React.useState("");
-  const setPendingToSave = useVoiceStore((state) => state.setPendingToSave);
+  // no-op reference removed; stash occurs in flow hook
 
   React.useEffect(() => {
     if (state.brandVoice) setBrandVoice(state.brandVoice);
@@ -40,36 +43,24 @@ export function BrandVoiceDialog({
 
   const onSave = async () => {
     if (!brandVoice) return;
-    const res = await actions.save({
-      voice: brandVoice,
-      sourceUrl: websiteUrl,
-    });
-    if (res.next === "auth") {
-      setPendingToSave({ sourceUrl: websiteUrl, voice: brandVoice });
-      // redirect is handled in save() caller when next !== done; here we only stash pending state
-    } else {
-      onClose();
-    }
+    await flow.saveToAccount({ voice: brandVoice, sourceUrl: websiteUrl });
+    onClose();
   };
 
   const onUseVoice = async () => {
     if (!brandVoice) return;
-    await actions.useFree({ voice: brandVoice });
+    await flow.useForContent({ voice: brandVoice, sourceUrl: websiteUrl });
+    onClose();
   };
 
   const hasVoice = !!brandVoice;
 
   return (
-    <DialogContent>
+    <DialogContent className="sm:max-w-2xl">
       <DialogHeader>
         <DialogTitle>
-          {hasVoice ? "Review Your Brand Voice" : "Generate Your Brand Voice"}
+          {hasVoice ? "Edit Voice" : "Generate Your Brand Voice"}
         </DialogTitle>
-        <DialogDescription>
-          {hasVoice
-            ? "You can refine any field below before saving."
-            : "Enter your website and optionally paste a short sample of your writing. We'll analyze your tone, style, and audience."}
-        </DialogDescription>
       </DialogHeader>
 
       {!hasVoice ? (

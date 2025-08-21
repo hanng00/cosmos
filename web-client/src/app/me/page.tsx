@@ -1,6 +1,6 @@
 "use client";
 
-import { useMe } from "@/features/account/hooks";
+import { useMe } from "@/features/auth/useMe";
 
 export default function MePage() {
   const { data, isLoading, error } = useMe();

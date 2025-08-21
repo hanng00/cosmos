@@ -11,7 +11,7 @@ const brandsRepo = new BrandsRepository();
 const doc = getDocClient();
 const tableName = getTableName();
 
-const brandVoiceSchema = z.object({
+const BrandVoiceSchema = z.object({
   name: z.string().min(1),
   purpose: z.string().min(1),
   audience: z.string().min(1),
@@ -43,7 +43,7 @@ export const lambdaHandler = async (
       };
     }
 
-    const parse = brandVoiceSchema.safeParse(JSON.parse(event.body));
+    const parse = BrandVoiceSchema.safeParse(JSON.parse(event.body));
     if (!parse.success) {
       return {
         statusCode: 400,

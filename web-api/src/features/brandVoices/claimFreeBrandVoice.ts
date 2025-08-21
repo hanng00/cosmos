@@ -27,7 +27,18 @@ export const lambdaHandler = async (
     const free = await repo.getFreeBrandVoice(parsed.data.freeVoiceId);
     if (!free) return { statusCode: 404, headers: withCors({ "Content-Type": "application/json" }), body: JSON.stringify({ message: "Not found" }) };
 
-    const brand = await brands.create(user.userId, free.voice.name || "My Brand");
+    // Use the brand voice name, or derive from sourceUrl if available
+    let brandName = free.voice.name;
+    if (!brandName && free.sourceUrl) {
+      try {
+        const hostname = new URL(free.sourceUrl).hostname.replace(/^www\./, '');
+        const brandBase = hostname.split('.')[0] || 'brand';
+        brandName = brandBase.charAt(0).toUpperCase() + brandBase.slice(1);
+      } catch {
+        brandName = "My Brand";
+      }
+    }
+    const brand = await brands.create(user.userId, brandName || "My Brand");
 
     await doc.send(new PutCommand({
       TableName: tableName,

@@ -110,6 +110,71 @@ Resources:
       BuildProperties:
         Sourcemap: true
 
+  GetBrandFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/features/brands/getBrand.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref CosmosBackendTable
+      Events:
+        GetBrand:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /brands/{brandId}
+            Method: get
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CosmosBackendTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Sourcemap: true
+
+  PatchBrandFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/features/brands/patchBrand.lambdaHandler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CosmosBackendTable
+      Events:
+        PatchBrand:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /brands/{brandId}
+            Method: patch
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CosmosBackendTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Sourcemap: true
+
+  GetBrandPostsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/features/brands/getBrandPosts.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref CosmosBackendTable
+      Events:
+        GetBrandPosts:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /brands/{brandId}/posts
+            Method: get
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CosmosBackendTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Sourcemap: true
   GetMeFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -194,19 +259,19 @@ Resources:
       BuildProperties:
         Sourcemap: true
 
-  CreateBrandVoiceAnalysisFunction:
+  CreateBrandVoiceFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src/features/brandVoices/createAnalysis.lambdaHandler
+      Handler: src/features/brandVoices/createBrandVoice.lambdaHandler
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref CosmosBackendTable
       Events:
-        CreateBrandVoiceAnalysis:
+        CreateBrandVoice:
           Type: Api
           Properties:
             RestApiId: !Ref ApiGatewayApi
-            Path: /brand-voices/analyses
+            Path: /brand-voices/create
             Method: post
             Auth:
               Authorizer: NONE
@@ -240,19 +305,40 @@ Resources:
       BuildProperties:
         Sourcemap: true
 
-  GetBrandVoiceAnalysisFunction:
+  GetBrandVoiceByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src/features/brandVoices/getAnalysis.lambdaHandler
+      Handler: src/features/brands/getBrandVoice.lambdaHandler
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref CosmosBackendTable
       Events:
-        GetBrandVoiceAnalysis:
+        GetBrandVoiceById:
           Type: Api
           Properties:
             RestApiId: !Ref ApiGatewayApi
-            Path: /brand-voices/analyses/{analysisId}
+            Path: /brands/{brandId}/voice
+            Method: get
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CosmosBackendTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Sourcemap: true
+  GetBrandVoiceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/features/brandVoices/getBrandVoice.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref CosmosBackendTable
+      Events:
+        GetBrandVoice:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /brand-voices/{analysisId}
             Method: get
             Auth:
               Authorizer: NONE
@@ -298,7 +384,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref ApiGatewayApi
-            Path: /brand-voices/free
+            Path: /free-brand-voices
             Method: post
             Auth:
               Authorizer: NONE
@@ -322,7 +408,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref ApiGatewayApi
-            Path: /brand-voices/free/{freeVoiceId}/claim
+            Path: /free-brand-voices/{freeVoiceId}/claim
             Method: post
       Environment:
         Variables:

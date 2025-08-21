@@ -9,25 +9,21 @@ import { fadeInUpVariants, createFadeInUpVariants } from "@/lib/animations";
 import { useScrollAnimation } from "@/hooks/use-animation";
 import { headerImageUrl } from "@/data/images";
 import styles from "./HeroSection.module.css";
-import { getUrlIfValid } from "@/lib/url";
-import { useBrandVoiceModal } from "@/features/brand-voices/BrandVoiceProvider";
+
+import { useFreeBrandVoiceUserFlow } from "@/features/brand-voices/hooks/useFreeBrandVoiceUserFlow";
 
 export default function HeroSection() {
   const [url, setUrl] = useState("");
   const [submitted] = useState(false);
   // const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const brandVoiceModal = useBrandVoiceModal();
+  const flow = useFreeBrandVoiceUserFlow();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const urlIfValid = getUrlIfValid(url);
-    if (!urlIfValid) {
-      setError("Please enter a valid URL.");
-      return;
-    }
-    brandVoiceModal.open(urlIfValid.toString());
+    const res = flow.startFromUrl(url);
+    if (!res.ok) setError(res.error);
   };
 
   // Animation hooks for different elements
@@ -103,11 +99,11 @@ export default function HeroSection() {
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             required
-            className="h-10 flex-1 text-lg px-4 py-4 border-0 bg-white/20 text-white placeholder:text-white/60 rounded-lg focus:ring-2 focus:ring-white/30 transition-all backdrop-blur-sm min-w-0"
+            variant="blur"
           />
           <Button
             type="submit"
-            className="h-10 bg-white/20 text-white font-medium text-sm px-6 py-4 rounded-lg backdrop-blur-md hover:bg-white/30 transition-all shadow-none border-0"
+            variant="blur"
             size="lg"
             disabled={false}
           >

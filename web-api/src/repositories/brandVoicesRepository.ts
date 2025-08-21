@@ -66,7 +66,7 @@ export class BrandVoicesRepository {
     );
   }
 
-  async createFreeBrandVoice(voice: BrandVoice, email: string | null): Promise<{ freeVoiceId: string }> {
+  async createFreeBrandVoice(voice: BrandVoice, email: string | null, sourceUrl?: string): Promise<{ freeVoiceId: string }> {
     const now = new Date().toISOString();
     const freeVoiceId = Math.random().toString(36).slice(2, 10);
     await this.doc.send(
@@ -79,6 +79,7 @@ export class BrandVoicesRepository {
           freeVoiceId,
           email,
           voice,
+          sourceUrl,
           createdAt: now,
           updatedAt: now,
         },
@@ -88,7 +89,7 @@ export class BrandVoicesRepository {
     return { freeVoiceId };
   }
 
-  async getFreeBrandVoice(freeVoiceId: string): Promise<{ voice: BrandVoice; email: string | null } | null> {
+  async getFreeBrandVoice(freeVoiceId: string): Promise<{ voice: BrandVoice; email: string | null; sourceUrl?: string } | null> {
     const res = await this.doc.send(
       new GetCommand({
         TableName: this.tableName,
@@ -96,7 +97,11 @@ export class BrandVoicesRepository {
       })
     );
     if (!res.Item) return null;
-    return { voice: (res.Item as any).voice as BrandVoice, email: (res.Item as any).email ?? null };
+    return { 
+      voice: (res.Item as any).voice as BrandVoice, 
+      email: (res.Item as any).email ?? null,
+      sourceUrl: (res.Item as any).sourceUrl
+    };
   }
 }
 

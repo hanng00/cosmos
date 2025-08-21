@@ -17,6 +17,7 @@ const schema = z.object({
     language: z.array(z.string()).min(1),
   }),
   email: z.string().email().nullable().optional(),
+  sourceUrl: z.string().optional(),
 });
 
 export const lambdaHandler = async (
@@ -28,7 +29,7 @@ export const lambdaHandler = async (
     if (!event.body) return { statusCode: 400, headers: withCors({ "Content-Type": "application/json" }), body: JSON.stringify({ message: "Missing body" }) };
     const parsed = schema.safeParse(JSON.parse(event.body));
     if (!parsed.success) return { statusCode: 400, headers: withCors({ "Content-Type": "application/json" }), body: JSON.stringify({ message: "Invalid body", issues: parsed.error.flatten() }) };
-    const { freeVoiceId } = await repo.createFreeBrandVoice(parsed.data.voice, parsed.data.email ?? null);
+    const { freeVoiceId } = await repo.createFreeBrandVoice(parsed.data.voice, parsed.data.email ?? null, parsed.data.sourceUrl);
     return { statusCode: 200, headers: withCors({ "Content-Type": "application/json" }), body: JSON.stringify({ freeVoiceId }) };
   } catch (err) {
     return { statusCode: 500, headers: withCors({ "Content-Type": "application/json" }), body: JSON.stringify({ message: (err as Error).message || "Internal Server Error" }) };

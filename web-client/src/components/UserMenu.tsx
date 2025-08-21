@@ -4,7 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { signOut } from "aws-amplify/auth";
-import { useMe } from "@/features/account/hooks";
+import { useMe } from "@/features/auth/useMe";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -42,7 +42,7 @@ export function UserMenu() {
 
   if (!email) {
     return (
-      <Button size="sm" className="rounded-full" onClick={handleSignIn}>
+      <Button size="sm" onClick={handleSignIn}>
         Sign in
       </Button>
     );

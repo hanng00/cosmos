@@ -16,5 +16,3 @@ export async function getMe(): Promise<Me | null> {
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
   return (await res.json()) as Me;
 }
-
-
