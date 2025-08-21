@@ -51,17 +51,29 @@ export interface FreeBrandVoice {
   updatedAt: string;
 }
 
-export type PostStatus = "draft" | "generated" | "published";
+export type PostStatus = "draft" | "generating" | "generated" | "published";
 
 export interface Post {
   postId: string;
+  userId: string;
   brandId: string;
-  title: string;
-  excerpt?: string;
-  thumbnailUrl?: string;
+  instruction: string; // User's original instruction
+  title: string; // LLM-generated
+  content: string; // LLM-generated main content
+  excerpt?: string; // LLM-generated
+  thumbnailUrl?: string; // LLM-generated or extracted
+  hashtags?: string[]; // LLM-generated
   status: PostStatus;
+  metadata: PostMetadata;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PostMetadata {
+  generatedBy?: "llm" | "user";
+  model?: string;
+  processingTime?: number;
+  [key: string]: any; // Additional metadata based on channel/format
 }
 
 

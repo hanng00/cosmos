@@ -175,6 +175,74 @@ Resources:
       BuildMethod: esbuild
       BuildProperties:
         Sourcemap: true
+
+  PostBrandPostFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/features/brands/postBrandPost.lambdaHandler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CosmosBackendTable
+      Events:
+        PostBrandPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /brands/{brandId}/posts
+            Method: post
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CosmosBackendTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Sourcemap: true
+
+  GetBrandPostFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/features/brands/getBrandPost.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref CosmosBackendTable
+      Events:
+        GetBrandPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayApi
+            Path: /brands/{brandId}/posts/{postId}
+            Method: get
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CosmosBackendTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Sourcemap: true
+
+  GeneratePostFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/features/posts/generatePost.lambdaHandler
+      Timeout: 30
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CosmosBackendTable
+      Events:
+        PostGenerationStream:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt CosmosBackendTable.StreamArn
+            StartingPosition: LATEST
+            BatchSize: 10
+            MaximumBatchingWindowInSeconds: 5
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CosmosBackendTable
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Sourcemap: true
   GetMeFunction:
     Type: AWS::Serverless::Function
     Properties:

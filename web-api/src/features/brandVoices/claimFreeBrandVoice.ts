@@ -40,6 +40,7 @@ export const lambdaHandler = async (
     }
     const brand = await brands.create(user.userId, brandName || "My Brand");
 
+    // Store the brand voice as a separate record
     await doc.send(new PutCommand({
       TableName: tableName,
       Item: {
@@ -50,6 +51,18 @@ export const lambdaHandler = async (
         ...free.voice,
         createdAt: brand.createdAt,
         updatedAt: brand.updatedAt,
+      },
+    }));
+
+    // Update the brand record to include the voice snapshot for quick reads
+    await doc.send(new PutCommand({
+      TableName: tableName,
+      Item: {
+        ...brand,
+        PK: `BRAND#${brand.brandId}`,
+        SK: `BRAND`,
+        entityType: "BRAND",
+        voiceSnapshot: free.voice,
       },
     }));
 

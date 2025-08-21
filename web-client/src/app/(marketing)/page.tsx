@@ -21,7 +21,7 @@ export default function Home() {
       transition={{ duration: 0.8, ease: "easeOut" }}
     >
       <NavBar />
-      <div className="p-4 sm:p-8 md:p-12 lg:p-16 w-full">
+      <div className="p-4 sm:p-8 md:p-12 lg:p-16 container mx-auto">
         <HeroSection />
 
         {/* Examples Section */}
