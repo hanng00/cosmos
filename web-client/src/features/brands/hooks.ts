@@ -50,9 +50,10 @@ export function useBrandPost(brandId: string | undefined, postId: string | undef
       return getBrandPost(brandId, postId);
     },
     enabled: Boolean(brandId && postId),
-    refetchInterval: (data) => {
+    refetchInterval: (query) => {
       // Poll every 2 seconds if post is still generating
-      return data?.status === "generating" ? 2000 : false;
+      const post = query.state.data as Post | undefined;
+      return post?.status === "generating" ? 2000 : false;
     },
     refetchIntervalInBackground: true,
   });

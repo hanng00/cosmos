@@ -6,9 +6,10 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
 import { useMe } from "@/features/auth/useMe";
+import type { Me } from "@/features/auth/api/me";
 
 export function NavBar() {
-  const { data: me } = useMe();
+  const { data: me } = useMe() as { data: Me | null | undefined };
 
   return (
     <div className="sticky top-0 z-20 bg-background/60 backdrop-blur border-b w-full">
