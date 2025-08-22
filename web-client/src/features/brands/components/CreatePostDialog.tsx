@@ -24,7 +24,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useCreateBrandPost } from "../hooks";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 const postSchema = z.object({
   instruction: z.string().min(10, "Instruction must be at least 10 characters"),

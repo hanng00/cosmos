@@ -15,7 +15,7 @@ export type PostMetadata = {
   generatedBy?: "llm" | "user";
   model?: string;
   processingTime?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 export type Post = {

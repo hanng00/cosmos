@@ -13,11 +13,10 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Sparkles, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export default function BrandDetailPage() {
   const params = useParams<{ brandId: string }>();
